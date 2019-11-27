@@ -1,10 +1,9 @@
 import os
+print("The following working directory needs to be the same as where the excel document of the contact information is stored")
 print(os.getcwd())
-os.chdir("C:/Users/dojst/OneDrive/Documents/Synengco/webFill")
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-# imports for waiting for elements to appear
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -20,12 +19,13 @@ states = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA', 'Australian Capit
     'New South Wales', 'Northern Territory', 'South Australia', 'Tasmania', 'Western Australia']
 
 print("This is a script to automatically login to zoho via a microsoft account.")
-email = "d.jones3@uqconnect.edu.au" # input("Enter Email: ")
-mspassword = "Om*cron27" #input("Enter Password: ")
+email = input("Enter Email: ")
+mspassword = input("Enter Password: ")
+xlsName = input("Enter the name of the .xls file (including the .xls): ")
+
 driver = webdriver.Chrome()
 driver.get("https://accounts.zoho.com.au/signin?servicename=ZohoHome&signupurl=https://www.zoho.com/signup.html")
 
-#microsoftLogin = driver.find_element_by_class_name("fed_div azure_fed show_fed")
 wait = WebDriverWait(driver, 10)
 microsoftLogin = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".fed_div.azure_fed.show_fed")))
 microsoftLogin.click()
@@ -50,9 +50,9 @@ yesButton = wait.until(EC.visibility_of_element_located((By.ID, "idSIButton9")))
 yesButton.click()
 
 driver.get("https://crm.zoho.com.au/crm/org7000126776/tab/Leads/create")
-#driver.close()
 
-xls = pd.ExcelFile("CamCard_Contacts_XLS.xls")
+
+xls = pd.ExcelFile(xlsName)
 sheet = xls.parse()
 firstName = sheet['First Name']
 lastName = sheet['Last Name']
@@ -73,8 +73,10 @@ def getPhoneAndMobile(telephone1, telephone2, telephone3):
     for telephone in telephones:
         telephone = str(telephone)
         if len(telephone) < 10:
-            if len(telephone) != 0:
-                print("short telephone number?")
+            for char in telephone:
+                if char != ' ':
+                    print("short telephone number?")
+                    break
             continue
         if telephone[0] == '+':
             telephone = telephone[1:]
@@ -153,7 +155,8 @@ def getAddressDict(address):
 
 
 for i in range(len(firstName)):
-    input("Press enter to add lead: ")
+    print("Ready to add lead number: " + str(i + 1) + " of all " + str(len(firstName)) +  " leads.")
+    input("Press enter to automatically enter lead information: ")
 
     firstNameField = wait.until(EC.visibility_of_element_located((By.ID, "Crm_Leads_FIRSTNAME")))
     firstNameField.send_keys(firstName[i])
@@ -198,4 +201,5 @@ for i in range(len(firstName)):
     postCodeField.send_keys(addressDict.get('postCode'))
     countryField.send_keys(addressDict.get('country'))    
 
-
+print("All Lead information added")
+print("You can now close this window")
